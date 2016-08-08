@@ -16,9 +16,10 @@ const (
 	TEMPLATE_DIR = "../views"
 )
 
-templates := make(map[string]*template.Template)
+var templates map[string]*template.Template
 
 func init() {
+	templates = make(map[string]*template.Template)
 	fileInfoArr, err := ioutil.ReadDir(TEMPLATE_DIR)
 	check(err)
 
@@ -69,7 +70,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		_, err := io.Copy(t, f)
 		check(err)
 		http.Redirect(w, r, "/view?id="+filename,
-		http.StatusFound)
+			http.StatusFound)
 	}
 }
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +98,7 @@ func safeHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if e, ok := recover().(error); ok {
-				http.Error(w, err.Error(), http.StatusInternalServerError) //        的50x
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				// w.WriteHeader(http.StatusInternalServerError)
 				// renderHtml(w, "error", e)
 				// logging
