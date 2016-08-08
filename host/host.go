@@ -2,6 +2,7 @@ package host
 
 import (
 	"encoding/json"
+	"os"
 )
 
 type Host struct {
@@ -15,4 +16,12 @@ type Host struct {
 func (h Host) String() string {
 	s, _ := json.Marshal(h)
 	return string(s)
+}
+
+func GetHostName() string {
+	hostName, err := os.Hostname()
+	if err != nil {
+
+	}
+	return hostName
 }

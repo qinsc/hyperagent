@@ -1,9 +1,14 @@
 package main
 
 import (
-	"fmt"
 	srhost "github.com/shirou/gopsutil/host"
-	"host"
+	"html/template"
+	"hyperagent/host"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"path"
+	"runtime/debug"
 )
 
 func main() {
