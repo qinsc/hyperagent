@@ -22,7 +22,7 @@ func ListDisks() []DiskInfo {
 		return nil
 	}
 
-	disks := make([]DiskInfo, len(partitions))
+	disks := make([]DiskInfo, 0)
 	for _, partition := range partitions {
 		diskUsage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
@@ -31,6 +31,13 @@ func ListDisks() []DiskInfo {
 		}
 
 		log.Debug("partition: %s", partition)
+
+		if len(partition.Mountpoint) == 0 {
+			continue
+		}
+		if partition.Fstype == "UDF" {
+			continue
+		}
 
 		disk := DiskInfo{
 			Path:        partition.Mountpoint,

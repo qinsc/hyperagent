@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func ToString(v interface{}) string {
+func ToJson(v interface{}) string {
 	s, _ := json.Marshal(v)
 	return string(s)
 }

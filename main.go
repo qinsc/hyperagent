@@ -1,8 +1,11 @@
 package main
 
 import (
+	//	"hyperagent/host"
 	"hyperagent/log"
 	"hyperagent/rest"
+	//	"hyperagent/util"
+	"hyperagent/gui"
 	"hyperagent/web"
 	"net/http"
 )
@@ -11,6 +14,16 @@ func main() {
 	log.Debug("Start hyperagent ....")
 	log.Debug("========================================================================\n")
 
+	go gui.CreateTray()
+	startWebServer()
+
+	//	log.Error(util.ToJson(host.GetHostInfo()))
+
+	log.Debug("\n========================================================================")
+	log.Debug("Hyeragent stared.")
+}
+
+func startWebServer() {
 	mux := http.NewServeMux()
 	web.HandlerWebSite(mux)
 	rest.HandlerRestServices(mux)
@@ -18,7 +31,4 @@ func main() {
 	if err != nil {
 		log.Error("ListenAndServe: ", err.Error())
 	}
-
-	log.Debug("\n========================================================================")
-	log.Debug("Hyeragent stared.")
 }
