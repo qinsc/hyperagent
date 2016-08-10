@@ -1,7 +1,7 @@
 package host
 
 import (
-	"log"
+	"hyperagent/log"
 
 	disk "github.com/shirou/gopsutil/disk"
 )
@@ -21,7 +21,7 @@ type Disk struct {
 func ListDisks() []Disk {
 	partitions, err := disk.Partitions(true)
 	if err != nil {
-		log.Println("Get disks failed.")
+		log.Error("Get disks failed.")
 		return nil
 	}
 
@@ -29,7 +29,7 @@ func ListDisks() []Disk {
 	for _, partition := range partitions {
 		diskUsage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
-			log.Println("Get disk " + partition.Mountpoint + " usage failed.")
+			log.Error("Get disk " + partition.Mountpoint + " usage failed.")
 			continue
 		}
 

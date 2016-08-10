@@ -1,30 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"hyperagent/host"
+	"hyperagent/log"
 )
 
 func main() {
-	fmt.Println("Start hyperagent ....")
-	fmt.Println("========================================================================\n")
+	log.Debug("Start hyperagent ....")
+	log.Debug("========================================================================\n")
 
-	// fmt.Println("HostName: ", host.GetHostName())
-	// fmt.Println("NicInfos")
-	// showNetworkInfo()
-	fmt.Println(host.HostInfo().String())
+	log.Debug(host.GetHostInfo().String())
 
-	fmt.Println("\n========================================================================")
-	fmt.Println("Hyeragent stared.")
+	//	log.Debug("Output debug ...")
+	//	log.Info("Output info ...")
+	//	log.Warn("Output warn ...")
+	//	log.Error("Output error ...")
+
+	log.Debug("\n========================================================================")
+	log.Debug("Hyeragent stared.")
 }
-
-//func getHostInfo() (h host.Host) {
-//	hostInfo, _ := srhost.Info()
-//	h.HostName = hostInfo.Hostname
-//	h.OS = hostInfo.OS
-//	h.Platform = hostInfo.Platform
-//	h.BootTime = hostInfo.BootTime
-//	h.Uptime = hostInfo.Uptime
-//	fmt.Println(hostInfo)
-//	return
-//}

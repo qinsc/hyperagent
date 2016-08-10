@@ -2,7 +2,7 @@ package host
 
 import (
 	"encoding/json"
-	"log"
+	"hyperagent/log"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -34,16 +34,19 @@ func (h *Host) String() string {
 	return string(s)
 }
 
-func HostInfo() *Host {
+func GetHostInfo() *Host {
+	log.Debug("Start get HostInfo")
+	log.Debug("Call host.Info()")
 	hostInfo, err := host.Info()
 	if err != nil {
-		log.Println("Get host info failed.")
+		log.Debug("Get host info failed.")
 		return nil
 	}
 
+	log.Debug("Call cpu.Info()")
 	cpuInfos, err := cpu.Info()
 	if err != nil {
-		log.Println("Get cpu info failed.")
+		log.Debug("Get cpu info failed.")
 		return nil
 	}
 
@@ -55,26 +58,34 @@ func HostInfo() *Host {
 		cpuMhz = cpuInfo.Mhz
 		cpuModelName = cpuInfo.ModelName
 	}
+
+	log.Debug("Call cpu.Percent()")
 	cpuUsages, err := cpu.Percent(time.Second*5, false)
 	if err != nil {
-		log.Println("Get cpu usage failed.")
+		log.Debug("Get cpu usage failed.")
 		return nil
 	}
 
+	log.Debug("Call VirtualMemory()")
 	memoryInfo, err := mem.VirtualMemory()
 	if err != nil {
-		log.Println("Get memory info failed.")
+		log.Debug("Get memory info failed.")
 		return nil
 	}
 
+	log.Debug("Call ListNics()")
 	nics := ListNics()
+
+	log.Debug("Call ListDisks()")
 	disks := ListDisks()
+
+	log.Debug("Return HostInfo")
 	return &Host{
 		Hostname:          hostInfo.Hostname,
 		Uptime:            hostInfo.Uptime,
 		BootTime:          hostInfo.BootTime,
 		Procs:             hostInfo.Procs,
-		OS:                HostInfo().OS,
+		OS:                hostInfo.OS,
 		OSPlatform:        hostInfo.Platform,
 		OSPlatformFamily:  hostInfo.PlatformFamily,
 		OSPlatformVersion: hostInfo.PlatformVersion,
