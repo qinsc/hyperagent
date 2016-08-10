@@ -1,20 +1,23 @@
 package main
 
 import (
-	"hyperagent/host"
 	"hyperagent/log"
+	"hyperagent/rest"
+	"hyperagent/web"
+	"net/http"
 )
 
 func main() {
 	log.Debug("Start hyperagent ....")
 	log.Debug("========================================================================\n")
 
-	log.Debug(host.GetHostInfo().String())
-
-	//	log.Debug("Output debug ...")
-	//	log.Info("Output info ...")
-	//	log.Warn("Output warn ...")
-	//	log.Error("Output error ...")
+	mux := http.NewServeMux()
+	web.HandlerWebSite(mux)
+	rest.HandlerRestServices(mux)
+	err := http.ListenAndServe(":8080", mux)
+	if err != nil {
+		log.Error("ListenAndServe: ", err.Error())
+	}
 
 	log.Debug("\n========================================================================")
 	log.Debug("Hyeragent stared.")

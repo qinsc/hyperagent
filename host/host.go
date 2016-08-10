@@ -3,38 +3,33 @@ package host
 import (
 	"encoding/json"
 	"hyperagent/log"
-	"time"
+	//	"time"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 )
 
-type Host struct {
-	Hostname          string  `json:"hostname"`
-	Uptime            uint64  `json:"upTime"`
-	BootTime          uint64  `json:"bootTime"`
-	Procs             uint64  `json:"procs"`
-	OS                string  `json:"os"`
-	OSPlatform        string  `json:"osPlatform"`
-	OSPlatformFamily  string  `json:"osPlatformFamily"`
-	OSPlatformVersion string  `json:"osPlatformVersion"`
-	CPUCores          int32   `json:"cpuCores"`
-	CPUModelName      string  `json:"cpuModelName"`
-	CPUMhz            float64 `json:"cpuMhz"`
-	CPUUsage          float64 `json:"cpuUsage"`
-	MemTotal          uint64  `json:"memSize"`
-	MemUsedPercent    float64 `json:"memUsage"`
-	Nics              []Nic   `json:"nicInfos"`
-	Disks             []Disk  `json:"diskInfos"`
+type HostInfo struct {
+	Hostname          string     `json:"hostname"`
+	Uptime            uint64     `json:"upTime"`
+	BootTime          uint64     `json:"bootTime"`
+	Procs             uint64     `json:"procs"`
+	OS                string     `json:"os"`
+	OSPlatform        string     `json:"osPlatform"`
+	OSPlatformFamily  string     `json:"osPlatformFamily"`
+	OSPlatformVersion string     `json:"osPlatformVersion"`
+	CPUCores          int32      `json:"cpuCores"`
+	CPUModelName      string     `json:"cpuModelName"`
+	CPUMhz            float64    `json:"cpuMhz"`
+	CPUUsage          float64    `json:"cpuUsage"`
+	MemTotal          uint64     `json:"memSize"`
+	MemUsedPercent    float64    `json:"memUsage"`
+	Nics              []NicInfo  `json:"nicInfos"`
+	Disks             []DiskInfo `json:"diskInfos"`
 }
 
-func (h *Host) String() string {
-	s, _ := json.Marshal(h)
-	return string(s)
-}
-
-func GetHostInfo() *Host {
+func GetHostInfo() *HostInfo {
 	log.Debug("Start get HostInfo")
 	log.Debug("Call host.Info()")
 	hostInfo, err := host.Info()
@@ -60,11 +55,12 @@ func GetHostInfo() *Host {
 	}
 
 	log.Debug("Call cpu.Percent()")
-	cpuUsages, err := cpu.Percent(time.Second*5, false)
-	if err != nil {
-		log.Debug("Get cpu usage failed.")
-		return nil
-	}
+	//	cpuUsages, err := cpu.Percent(time.Second*5, false)
+	//	if err != nil {
+	//		log.Debug("Get cpu usage failed.")
+	//		return nil
+	//	}
+	cpuUsages := make([]float64, 1)
 
 	log.Debug("Call VirtualMemory()")
 	memoryInfo, err := mem.VirtualMemory()
@@ -80,7 +76,7 @@ func GetHostInfo() *Host {
 	disks := ListDisks()
 
 	log.Debug("Return HostInfo")
-	return &Host{
+	return &HostInfo{
 		Hostname:          hostInfo.Hostname,
 		Uptime:            hostInfo.Uptime,
 		BootTime:          hostInfo.BootTime,

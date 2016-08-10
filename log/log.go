@@ -13,26 +13,22 @@ func init() {
 	HALogger = logs.NewLogger(2)
 	HALogger.EnableFuncCallDepth(true)
 	HALogger.SetLogFuncCallDepth(3)
-	HALogger.SetLogger("console", `{"level":0}`)
+	HALogger.SetLogger("console", ``)
 	fmt.Println("Log init complete.")
 }
 
-func Info(msg string) {
-	//	HALogger.Info(msg)
-	fmt.Println(msg)
+func Info(format string, v ...interface{}) {
+	HALogger.Info(format, v...)
 }
 
-func Debug(msg string) {
-	//	HALogger.Debug(msg)
-	fmt.Println(msg)
+func Debug(format string, v ...interface{}) {
+	HALogger.Debug(format, v...)
 }
 
-func Warn(msg string) {
-	//	HALogger.Warn(msg)
-	fmt.Println(msg)
+func Warn(format string, v ...interface{}) {
+	HALogger.Warn(format, v...)
 }
 
-func Error(msg string) {
-	//	HALogger.Error(msg)
-	fmt.Println(msg)
+func Error(format string, v ...interface{}) {
+	HALogger.Error(format, v...)
 }

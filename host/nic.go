@@ -6,7 +6,7 @@ import (
 	net "github.com/shirou/gopsutil/net"
 )
 
-type Nic struct {
+type NicInfo struct {
 	Name        string   `json:"name"`
 	Mac         string   `json:"mac"`
 	Ips         []string `json:"ips"`
@@ -22,7 +22,7 @@ type Nic struct {
 	Fifoout     uint64   `json:"fifoout"`
 }
 
-func ListNics() []Nic {
+func ListNics() []NicInfo {
 	itfs, err := net.Interfaces()
 	if err != nil {
 		log.Error("Get nics failed.")
@@ -34,11 +34,11 @@ func ListNics() []Nic {
 		return nil
 	}
 
-	nics := make([]Nic, len(itfs))
+	nics := make([]NicInfo, len(itfs))
 	for _, itf := range itfs {
 		ioCounter, ok := ioCounterMap[itf.Name]
 		if ok {
-			nic := Nic{
+			nic := NicInfo{
 				Name:        itf.Name,
 				Mac:         itf.HardwareAddr,
 				BytesSent:   ioCounter.BytesSent,
@@ -74,6 +74,7 @@ func mapIOCounters() map[string]net.IOCountersStat {
 	ioCounterMap := make(map[string]net.IOCountersStat, len(ioCounters))
 	for _, ioCounter := range ioCounters {
 		ioCounterMap[ioCounter.Name] = ioCounter
+		log.Debug("net.IOCounterStat = %s", ioCounter)
 	}
 	return ioCounterMap
 }
