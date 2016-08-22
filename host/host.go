@@ -2,6 +2,7 @@ package host
 
 import (
 	"hyperagent/log"
+	"hyperagent/monitor"
 	"time"
 
 	. "github.com/CodyGuo/win"
@@ -11,10 +12,9 @@ import (
 )
 
 type HostInfo struct {
-	Hostname          string     `json:"hostname"`
+	Hostname          string     `json:"hostName"`
 	Uptime            uint64     `json:"upTime"`
 	BootTime          uint64     `json:"bootTime"`
-	Procs             uint64     `json:"procs"`
 	OS                string     `json:"os"`
 	OSPlatform        string     `json:"osPlatform"`
 	OSPlatformFamily  string     `json:"osPlatformFamily"`
@@ -24,9 +24,15 @@ type HostInfo struct {
 	CPUMhz            float64    `json:"cpuMhz"`
 	CPUUsage          float64    `json:"cpuUsage"`
 	MemTotal          uint64     `json:"memSize"`
+	MemUsed           uint64     `json:"memUsed"`
 	MemUsedPercent    float64    `json:"memUsage"`
 	Nics              []NicInfo  `json:"nicInfos"`
 	Disks             []DiskInfo `json:"diskInfos"`
+}
+
+type HostConfig struct {
+	HostName string           `json:"hostName"`
+	Monitor  *monitor.Monitor `json:"monitor"`
 }
 
 func GetHostInfo() *HostInfo {
@@ -80,7 +86,6 @@ func GetHostInfo() *HostInfo {
 		Hostname:          hostInfo.Hostname,
 		Uptime:            hostInfo.Uptime,
 		BootTime:          hostInfo.BootTime,
-		Procs:             hostInfo.Procs,
 		OS:                hostInfo.OS,
 		OSPlatform:        hostInfo.Platform,
 		OSPlatformFamily:  hostInfo.PlatformFamily,
@@ -90,10 +95,20 @@ func GetHostInfo() *HostInfo {
 		CPUModelName:      cpuModelName,
 		CPUUsage:          cpuUsages[0],
 		MemTotal:          memoryInfo.Total,
+		MemUsed:           memoryInfo.Used,
 		MemUsedPercent:    memoryInfo.UsedPercent,
 		Nics:              nics,
 		Disks:             disks,
 	}
+}
+
+func GetHostName() string {
+	hostInfo, err := host.Info()
+	if err != nil {
+		log.Debug("Get host info failed.")
+		return "Unkown hostName"
+	}
+	return hostInfo.Hostname
 }
 
 func LogoffHost() {
@@ -102,12 +117,12 @@ func LogoffHost() {
 
 func ShutdownHost() {
 	getPrivileges()
-	ExitWindowsEx(EWX_SHUTDOWN&EWX_FORCE, 0)
+	ExitWindowsEx(EWX_SHUTDOWN|EWX_FORCE, 0)
 }
 
 func RebootHost() {
 	getPrivileges()
-	ExitWindowsEx(EWX_REBOOT&EWX_FORCE, 0)
+	ExitWindowsEx(EWX_REBOOT|EWX_FORCE, 0)
 }
 
 func getPrivileges() {

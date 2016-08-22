@@ -80,11 +80,19 @@ func CreateTray() {
 	xcgui.XRunXCGUI()
 }
 
-func ShowMessage(msg string) {
-	if err := notifyIcon.ShowInfo("托盘", msg); err != nil {
+func ShowMessageAll(msg string) {
+	ShowMessage(msg, true)
+}
+
+func ShowMessage(msg string, showBox bool) {
+	if err := notifyIcon.ShowInfo("信息", msg); err != nil {
 		log.Error("ShowInfo error: %v", err)
 	}
 
-	log.Debug("Do Show MessageBox ...")
-	xcgui.MessageBox(xcgui.XWnd_GetHWND(hWindow), "提示信息", msg, xcgui.MB_ICONINFORMATION)
+	if showBox {
+		log.Debug("Do Show MessageBox ...")
+		go func() {
+			xcgui.MessageBox(xcgui.XWnd_GetHWND(hWindow), "提示信息", msg, xcgui.MB_ICONINFORMATION)
+		}()
+	}
 }
