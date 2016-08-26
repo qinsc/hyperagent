@@ -15,7 +15,8 @@ type Monitor struct {
 	MonitorIp         string `json:"monitorIp"`
 	EtcdIp            string `json:"etcdIp"`
 	EtcdPort          string `json:"etcdPort"`
-	HeartBeatInterval int    `json:"heartBeatInterval"`
+	HeartBeatInterval string `json:"heartBeatInterval"`
+	HeartBeatTimeout  string `json:"heartBeatTimeout"`
 	GuacdIp           string `json:"guacdIp"`
 	GuacdPort         string `json:"guacdPort"`
 }
@@ -47,6 +48,12 @@ func SaveMonitor(m *Monitor) {
 		return
 	}
 	loadMonitorConfig()
+}
+
+func RemoveMonitor() {
+	log.Info("Delete monitor.json ..")
+	os.Remove(_MONITOR_JSON)
+	monitor = nil
 }
 
 func loadMonitorConfig() {

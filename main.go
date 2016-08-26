@@ -2,6 +2,7 @@ package main
 
 import (
 	"hyperagent/gui"
+	"hyperagent/heartbeat"
 	"hyperagent/log"
 	"hyperagent/rest"
 	"hyperagent/web"
@@ -55,9 +56,9 @@ func main() {
 
 	//func runService() {
 	log.Debug("Start hyperagent ....")
-	log.Debug("=====================================================getHostName===================\n")
 
 	go gui.CreateTray()
+	heartbeat.StartHeartBeat()
 	startWebServer()
 
 	//	log.Error(util.ToJson(host.GetHostInfo()))
