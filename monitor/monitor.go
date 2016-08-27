@@ -62,6 +62,8 @@ func loadMonitorConfig() {
 		log.Error("Error while open monitor.json")
 		return
 	}
+	defer file.Close()
+
 	decoder := json.NewDecoder(file)
 	var m Monitor
 	err = decoder.Decode(&m)

@@ -11,13 +11,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"runtime/debug"
-	//"time"
+	"strings"
 )
 
 func HandlerRestServices(mux *http.ServeMux) {
 	log.Debug("HandlerRestServices")
 	mux.HandleFunc("/rest/host/config", safeHandlerRest(getHostConfig))
 	mux.HandleFunc("/rest/host/info", safeHandlerRest(getHostInfo))
+	mux.HandleFunc("/rest/host/detailinfo", safeHandlerRest(getHostDetailInfo))
 	mux.HandleFunc("/rest/host/add", safeHandlerRest(addHost))
 	mux.HandleFunc("/rest/host/remove", safeHandlerRest(removeHost))
 	mux.HandleFunc("/rest/host/logoff", safeHandlerRest(logoffHost))
@@ -116,6 +117,18 @@ func getHostInfo(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "json")
 		if hostInfo != nil {
 			w.Write([]byte(util.ToJson(hostInfo)))
+		}
+	}
+}
+
+func getHostDetailInfo(w http.ResponseWriter, r *http.Request) {
+	log.Debug("do getHostDetailInfo, Method = %s", r.Method)
+	if r.Method == "GET" {
+		hostDetailInfo := host.GetHostDetailInfo()
+		// w.Header().Set("Content-Type", "json")
+		if hostDetailInfo != "" {
+			hostDetailInfo = strings.Replace(hostDetailInfo, "\n", "<br/>", -1)
+			w.Write([]byte(hostDetailInfo))
 		}
 	}
 }

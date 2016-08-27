@@ -3,6 +3,9 @@ package host
 import (
 	"hyperagent/log"
 	"hyperagent/monitor"
+	"hyperagent/util"
+	"io/ioutil"
+	"os/exec"
 	"time"
 
 	. "github.com/CodyGuo/win"
@@ -33,6 +36,23 @@ type HostInfo struct {
 type HostConfig struct {
 	HostName string           `json:"hostName"`
 	Monitor  *monitor.Monitor `json:"monitor"`
+}
+
+func init() {
+	GetHostDetailInfo()
+}
+
+func GetHostDetailInfo() string {
+	cmd := exec.Command("systeminfo")
+	stdout, err := cmd.StdoutPipe()
+	cmd.Start()
+	content, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		log.Error("Error while get host detailinfo, err = " + util.ToJson(err))
+		return ""
+	}
+	// log.Debug(string(content))
+	return string(content)
 }
 
 func GetHostInfo() *HostInfo {
