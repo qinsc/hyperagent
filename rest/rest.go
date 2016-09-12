@@ -1,8 +1,8 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
-	"hyperagent/gui"
 	"hyperagent/heartbeat"
 	"hyperagent/host"
 	"hyperagent/log"
@@ -10,6 +10,9 @@ import (
 	"hyperagent/util"
 	"io/ioutil"
 	"net/http"
+	//	"os"
+	//	"os/exec"
+	//	"path/filepath"
 	"runtime/debug"
 	"strings"
 )
@@ -82,7 +85,7 @@ func addHost(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(util.ToJson(hostInfo)))
 		}
 
-		heartbeat.StartHeartBeat()
+		heartbeat.StartHB()
 	}
 }
 
@@ -104,7 +107,7 @@ func removeHost(w http.ResponseWriter, r *http.Request) {
 
 			if m.HostId == hostId {
 				monitor.RemoveMonitor()
-				heartbeat.StopHeartBeat()
+				heartbeat.StopHB()
 			}
 		}
 	}
@@ -176,12 +179,16 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		msg := string(body)
-		log.Debug("msg = %s", msg)
 
 		go func() {
 			log.Debug("Show Message ...")
-			gui.ShowMessageAll(msg)
+
+			msg := bytes.NewBuffer(body)
+			_, err := http.Post("http://127.0.0.1:8081/rest/gui/message", "application/json;charset=utf-8", msg)
+			if err != nil {
+				log.Error("Post gui message failed, %v ", err)
+				return
+			}
 		}()
 	}
 }

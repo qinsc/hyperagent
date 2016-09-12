@@ -4,75 +4,101 @@ import (
 	"hyperagent/log"
 	"hyperagent/monitor"
 	"hyperagent/util"
-	"strconv"
+	"sync"
 	"time"
 
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
 )
 
-type HeartBeatInfo struct {
+var (
+	tick = time.Tick(time.Second)
+	hbCH = make(chan int)
+	once sync.Once
+)
+
+const (
+	hb_start = iota
+	hb_stop
+	hb_quit
+)
+
+func runHB(ch chan int) {
+loop:
+	for {
+		select {
+		case c := <-ch:
+			log.Debug("Get control signal")
+			if c == hb_start {
+				log.Debug("to start hb")
+				StartHB()
+			} else if c == hb_stop {
+				log.Debug("to stop hb")
+				StopHB()
+			} else {
+				log.Debug("to quit hb")
+				QuitHB()
+				break loop
+			}
+		}
+	}
+
+	log.Debug("HB controller goroutine finished.")
+}
+
+func StartHB() {
+	log.Debug("startHB")
+	once.Do(doHB)
+	hbCH <- hb_start
+}
+
+func StopHB() {
+	log.Debug("stopHB")
+	hbCH <- hb_stop
+}
+
+func QuitHB() {
+	log.Debug("quitHB")
+	hbCH <- hb_quit
+}
+
+func doHB() {
+	go func() {
+		send := true
+	loop:
+		for {
+			select {
+			case <-tick:
+				log.Debug(time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05"))
+				if send {
+					go sendHB()
+				} else {
+					log.Debug("not send ...")
+				}
+			case sendHB := <-hbCH:
+				if sendHB == hb_start {
+					log.Debug("Set send to true")
+					send = true
+				} else if sendHB == hb_stop {
+					log.Debug("Set send to false")
+					send = false
+				} else {
+					log.Debug("break send loop")
+					break loop
+				}
+				continue loop
+			}
+		}
+
+		log.Debug("HB worker finished")
+	}()
+}
+
+type HBInfo struct {
 	ManagerIp string
 }
 
-var ch chan bool = make(chan bool)
-var hbRunning bool = false
-
-func StartHeartBeat() {
-	log.Info("Start heartbeat")
-	m := monitor.GetMonitor()
-	if m != nil && m.EtcdIp != "" {
-		log.Info("Etcd ip = %s, port = %s, heartbeat interlval = %s, timeout = %s", m.EtcdIp, m.EtcdPort, m.HeartBeatInterval, m.HeartBeatTimeout)
-		startHB()
-	} else {
-		log.Info("Etcd is not configed, heartbeat is not started.")
-	}
-}
-
-func startHB() {
-	if !hbRunning {
-		go heartBeat()
-		hbRunning = true
-	}
-}
-
-func StopHeartBeat() {
-	if hbRunning {
-		go func() {
-			select {
-			case ch <- true:
-				log.Info("Heart beat stoped")
-			case <-time.After(time.Second * 90):
-				log.Info("Stop heart beat timeout ...")
-
-			}
-		}()
-		hbRunning = false
-	}
-}
-
-func heartBeat() {
-	hbInterval, err := strconv.Atoi(monitor.GetMonitor().HeartBeatInterval)
-	if err != nil {
-		hbInterval = 30
-	}
-	go sendHBtoEtcd()
-
-HB:
-	for {
-		select {
-		case <-time.After(time.Second * time.Duration(hbInterval)):
-			log.Info("Send heart to etcd ...")
-			go sendHBtoEtcd()
-		case <-ch:
-			log.Info("Stop heart beat ...")
-			ch <- true
-			break HB
-		}
-	}
-}
-
-func sendHBtoEtcd() {
+func sendHB() {
 	m := monitor.GetMonitor()
 	if m == nil {
 		return
@@ -90,13 +116,12 @@ func sendHBtoEtcd() {
 		log.Error("Etcd client create failed")
 		return
 	}
-	//	defer cli.Close()
 
 	log.Debug("Send to Etcd")
 
 	kAPI := client.NewKeysAPI(cli)
 
-	hb := HeartBeatInfo{
+	hb := HBInfo{
 		ManagerIp: m.MonitorIp,
 	}
 

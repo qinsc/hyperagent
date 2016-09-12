@@ -23,15 +23,6 @@ type Monitor struct {
 
 var monitor *Monitor
 
-func init() {
-	// 试着读取配置文件，取得monitor的配置
-	if _, err := os.Stat(_MONITOR_JSON); os.IsNotExist(err) {
-		log.Warn("Monitor.json is not exists.")
-	} else {
-		loadMonitorConfig()
-	}
-}
-
 func GetMonitor() *Monitor {
 	return monitor
 }
@@ -47,7 +38,7 @@ func SaveMonitor(m *Monitor) {
 		log.Error("Error while write monitor.json")
 		return
 	}
-	loadMonitorConfig()
+	LoadMonitorConfig()
 }
 
 func RemoveMonitor() {
@@ -56,7 +47,14 @@ func RemoveMonitor() {
 	monitor = nil
 }
 
-func loadMonitorConfig() {
+func LoadMonitorConfig() {
+	log.Info("Start load monitor config ....")
+	if _, err := os.Stat(_MONITOR_JSON); os.IsNotExist(err) {
+		log.Warn("Monitor.json is not exists.")
+		return
+	}
+
+	log.Debug("Open monitor file ....")
 	file, err := os.Open(_MONITOR_JSON)
 	if err != nil {
 		log.Error("Error while open monitor.json")
